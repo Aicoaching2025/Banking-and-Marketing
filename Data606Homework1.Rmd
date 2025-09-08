@@ -1,0 +1,119 @@
+---
+title: "Bank Marketing Analysis by Candace Grant"
+output: pdf_document
+date: "2025-08-31"
+---
+
+### Introduction
+
+This data report presents an analysis of a marketing dataset from a Portuguese banking institution's direct marketing campaigns. The dataset focuses on phone-based marketing efforts aimed at promoting term deposits to clients. 
+
+The primary objective is to develop a predictive classification model that determines whether a client will subscribe to a term deposit (binary outcome: 'yes' or 'no'). The campaigns often required multiple contacts with the same client to achieve successful conversions, making this a complex customer behavior prediction problem."
+
+**Dataset Source:**
+Moro, S., Rita, P., & Cortez, P. (2014). Bank Marketing [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C5K306.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
+                      results = 'markup', fig.show = 'asis', fig.keep = 'all', fig.width = 8, fig.height = 6, comment = "")
+```
+#### Loading packages for data analysis
+
+```{r packages}
+library(tidyverse)
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+```
+#### Import Dataset
+
+```{r}
+df <- read_excel("/Users/candace/Downloads/bank+marketing 2/bank/bank-full.xls")
+
+```
+#### Dataset Overview and Structure
+
+
+```{r }
+cat("Number of rows:", nrow(df), "\n")
+cat("Number of columns:", ncol(df), "\n")
+
+print(names(df))
+
+sapply(df, class)
+
+print(head(df))
+```
+#### Removing columns, "contact" and "poutcome" where over 70% of values are labeled "unknown."
+
+
+```{r }
+df_clean <- df[, !names(df) %in% c("contact", "poutcome")]
+```
+
+
+
+```{r }
+str(df_clean)
+```
+#### Renaming columns to be more descriptive
+
+```{r}
+library(dplyr)
+df_clean <- df_clean %>% rename(
+  marital_status = marital,
+  education_level = education,
+  credit_card_default = default,
+  avg_yearly_balance = balance,
+  mortgage = housing,
+  personal_loan = loan,
+  recency = pdays,
+  prior_contacts = previous,
+  subscribed = y
+)
+str(df_clean)
+```
+#### In this section I am creating simple bar plots to give an understanding of the characteristics of potential customers that could shed light on their final decision to subscribe to the term deposit.
+
+
+```{r}
+library(ggplot2)
+
+#### Relationship Plots ####
+
+# Job vs Mortgage
+ggplot(df_clean, aes(x = job, fill = mortgage)) +
+  geom_bar(position = "fill") +
+  labs(title = "Mortgage by Job Type") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Job vs Personal Loan
+ggplot(df_clean, aes(x = job, fill = personal_loan)) +
+  geom_bar(position = "fill") +
+  labs(title = "Personal Loan by Job Type") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Side-by-side bars instead of stacked
+ggplot(df_clean, aes(x = job, fill = subscribed)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Term Deposit Subscription by Job Type") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+### Conclusion
+
+I began this analysis by examining the dataset structure and discovered an important data quality issue: missing values were coded as 'unknown' rather than traditional NA values, which R does not automatically recognize as missing data.
+To address this, I calculated the percentage of 'unknown' values in each column and removed those with greater than 70% missing data, particularly columns that did not contribute to the primary objective of predicting term deposit subscriptions.
+Key steps completed:
+
+- Reviewed dataset structure and identified data quality issues
+- Renamed columns for better clarity and interpretability
+- Removed columns with excessive missing data (>70% 'unknown' values)
+- Created visualizations to explore relationships between variables and the target outcome
+
+This preprocessing creates a clean dataset suitable for identifying factors that influence customer decisions to subscribe to term deposits.
